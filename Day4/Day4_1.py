@@ -82,9 +82,7 @@ class Board:
                 break
 
         return success
-
-
-subtract = 5*10
+    
 
 for i in range(0, len(lines), BOARD_SIZE + 1):
     Board(i)
