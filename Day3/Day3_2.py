@@ -6,9 +6,35 @@ input = open("input.txt")
 lines = input.readlines()
 
 length = len(lines[1].strip())  # gets the length of a binary number
-open_values = lines
+oxygen_open_values = lines
+co2_open_values = lines
 
-oxygen_rating = 0
+
+def oxygenIsMostCommon(val, current):
+    return val > current
+
+
+def co2IsMostCommon(val, current):
+    return val < current
+
+
+rating_info = {
+    "oxygen": {
+        "open_values": lines,
+        "primary": "1",
+        "rating": None,
+        "current": 0,
+        "most_common_determinator": oxygenIsMostCommon,
+    },
+
+    "co2": {
+        "open_values": lines,
+        "primary": "0",
+        "rating": None,
+        "current": math.inf,
+        "most_common_determinator": co2IsMostCommon,
+    }
+}
 
 
 def binaryToDecimal(b: str):
@@ -16,41 +42,42 @@ def binaryToDecimal(b: str):
 
 
 for i in range(length):
-    common_values = {
-        "0": 0,
-        "1": 0,
-    }
+    for key, info in rating_info.items():
+        common_values = {
+            "0": 0,
+            "1": 0,
+        }
 
-    oxygen_most_common = None
-    oxygen_highest_value = 0
+        new_open_values = []
 
-    for idx in range(len(open_values)):
-        line = open_values[idx]
-        bit = line[i]
-        common_values[str(bit)] += 1
+        most_common = None
+        highest_value = info["current"]
 
-    # get the most common bit
-    if common_values["0"] == common_values["1"]:
-        oxygen_most_common = "1"
-    else:
-        for idx, val in common_values.items():
-            if val > oxygen_highest_value:
-                oxygen_most_common = idx
-                oxygen_highest_value = val
+        for idx in range(len(info["open_values"])):
+            line = info["open_values"][idx]
+            bit = line[i]
+            common_values[str(bit)] += 1
 
-    oxygen_new_open_values = []
+        # get the most common bit
+        if common_values["0"] == common_values["1"]:
+            most_common = info["primary"]
+        else:
+            for idx, val in common_values.items():
+                if info["most_common_determinator"](val, highest_value):
+                    most_common = idx
+                    highest_value = val
 
-    for idx in range(len(open_values)):
-        line = open_values[idx]
-        bit = line[i]
+        for idx in range(len(info["open_values"])):
+            line = info["open_values"][idx]
+            bit = line[i]
 
-        if bit == oxygen_most_common:
-            oxygen_new_open_values.append(line)
+            if bit == most_common:
+                new_open_values.append(line)
 
-    open_values = oxygen_new_open_values
+        info["open_values"] = new_open_values
 
-    if len(open_values) == 1:
-        oxygen_rating = open_values[0]
+        if len(info["open_values"]) == 1:
+            info["rating"] = info["open_values"][0]
 
 
-print(binaryToDecimal(oxygen_rating))
+print(binaryToDecimal(rating_info["oxygen"]["rating"]) * binaryToDecimal(rating_info["co2"]["rating"]))
